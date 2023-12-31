@@ -7,3 +7,4 @@ SortIncludes: false
 ColumnLimit: 80
 NamespaceIndentation: All
 IndentWidth: 4
+IndentExternBlock: true
