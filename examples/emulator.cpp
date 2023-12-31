@@ -25,13 +25,18 @@ int main() {
         emulator.exec(1, &result);
         if (result.wen != 0) {
             last_commit = cycle;
-            fmt::println("pc: {:x}, wen: {:x}, wreg_num: {:x}, wreg_data: {:x}",
+            fmt::println("pc: 0x{:x}, wen: {}, wreg_num: {}, wreg_data: 0x{:x}",
                          result.pc, result.wen, result.reg_id, result.reg_val);
         }
         cycle++;
         if (cycle - last_commit > 500) {
             fmt::println("Commit timeout at cycle {}, last commmit: {}", cycle,
                          last_commit);
+            break;
+        }
+        if (result.state == NEMU_ABORT || result.state == NEMU_QUIT ||
+            result.state == NEMU_END) {
+            fmt::println("Emulator stopped at cycle {}", cycle);
             break;
         }
     }

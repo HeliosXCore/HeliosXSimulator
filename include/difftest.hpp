@@ -3,11 +3,13 @@
 #include <stddef.h>
 
 extern "C" {
+    enum CpuState { NEMU_RUNNING, NEMU_STOP, NEMU_END, NEMU_ABORT, NEMU_QUIT };
     struct DifftestResult {
         int reg_id;
         uint32_t reg_val;
         int8_t wen;
         uint32_t pc;
+        int state;
     };
     void difftest_setregs(const void *r);
     void difftest_memcpy_from_dut(uint32_t dest, void *src, size_t n);
