@@ -10,6 +10,12 @@ LDFLAGS		:= -L3rd-party/HeliosXEmulator/build -lHeliosXEmulator \
 			   -lstdc++
 DFLAGS		:= -DFMT_HEADER_ONLY
 
+DEBUG		?= N
+
+ifeq ($(DEBUG),Y)
+	DFLAGS += -DDEBUG
+endif
+
 .PHONY: build clean
 
 all: $(OBJS)
