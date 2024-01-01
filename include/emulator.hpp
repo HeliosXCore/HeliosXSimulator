@@ -1,5 +1,5 @@
 #pragma once
-#include "difftest.hpp"
+#include "ffi.hpp"
 
 namespace heliosxsimulator {
     class EmulatorWrapper {

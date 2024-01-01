@@ -1,5 +1,5 @@
 #include "emulator.hpp"
-#include "difftest.hpp"
+#include "ffi.hpp"
 #include <fmt/core.h>
 
 using namespace heliosxsimulator;
