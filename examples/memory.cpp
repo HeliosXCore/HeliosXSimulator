@@ -49,4 +49,6 @@ int main() {
     ASSERT(ack_o == 1, "ack_o should be 0");
     ASSERT(data_o == 0x12345678, "data_o should be 0x12345678 and not 0x{:x}",
            data_o);
+
+    std::remove("memory.coe");
 }
