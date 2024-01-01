@@ -1,5 +1,6 @@
 #include "memory.hpp"
 #include <fmt/core.h>
+#include <fstream>
 
 namespace heliosxsimulator {
     Memory::Memory(uint32_t base_addr, uint32_t size)
@@ -9,7 +10,23 @@ namespace heliosxsimulator {
         next_data = 0;
     }
 
-    void Memory::load(std::string filename) {}
+    void Memory::load(std::string filename) {
+        std::ifstream in(filename, std::ios::binary);
+        if (!in.is_open()) {
+            fmt::print(stderr, "Cannot open file {}\n", filename);
+            exit(1);
+        } else {
+#ifdef DEBUG
+            // Print file content
+            // std::string content((std::istreambuf_iterator<char>(in)),
+            //                     (std::istreambuf_iterator<char>()));
+            // fmt::println("[DEBUG] File content: {}", content);
+#endif
+            // Read file content into memory
+            in.read(mem.get(), size);
+            in.close();
+        }
+    }
 
     void Memory::load(uint32_t addr, const char* buf, size_t n) {
         for (int i = 0; i < n; i++) {
