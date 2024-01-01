@@ -1,4 +1,5 @@
 #include "memory.hpp"
+#include <fmt/core.h>
 
 namespace heliosxsimulator {
     Memory::Memory(uint32_t base_addr, uint32_t size)
@@ -53,6 +54,12 @@ namespace heliosxsimulator {
 
             next_ack = 1;
             next_data = *(uint32_t*)(mem.get() + wb_addr - base_addr);
+#ifdef DEBUG
+            fmt::println(
+                "[DEBUG] wb_cycle: {}, wb_we: {}, wb_addr: 0x{:x}, wb_data: "
+                "0x{:x}, wb_sel: 0x{:x}, ack_o: {}, data_o: 0x{:x}",
+                wb_cycle, wb_we, wb_addr, wb_data, wb_sel, ack_o, data_o);
+#endif
         }
     }
 

@@ -22,7 +22,7 @@ all: $(OBJS)
 
 build/%.o: src/%.cpp
 	@mkdir -p build
-	@$(CC) $(IFLAGS) -std=c++17 -c $< -o $@
+	@$(CC) $(IFLAGS) $(DFLAGS) -std=c++17 -c $< -o $@
 
 build: $(OBJS)
 
