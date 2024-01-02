@@ -51,4 +51,19 @@ int main() {
            data_o);
 
     std::remove("memory.coe");
+
+    Memory imem = Memory(0x80000000, 0x10000);
+    mem.load(0x80000000, (const char *)img, sizeof(img) * sizeof(uint32_t));
+    Instruction inst_o;
+    mem.fetch(1, 0x80000000, inst_o, ack_o);
+    mem.fetch(1, 0x80000004, inst_o, ack_o);
+
+    for (int i = 0; i < 4; i++) {
+        fmt::println("inst_o[{}] = 0x{:x}", i, inst_o.instructions[i]);
+    }
+    mem.fetch(1, 0x80000008, inst_o, ack_o);
+
+    for (int i = 0; i < 4; i++) {
+        fmt::println("inst_o[{}] = 0x{:x}", i, inst_o.instructions[i]);
+    }
 }

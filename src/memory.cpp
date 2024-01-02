@@ -16,12 +16,6 @@ namespace heliosxsimulator {
             fmt::print(stderr, "Cannot open file {}\n", filename);
             exit(1);
         } else {
-#ifdef DEBUG
-            // Print file content
-            // std::string content((std::istreambuf_iterator<char>(in)),
-            //                     (std::istreambuf_iterator<char>()));
-            // fmt::println("[DEBUG] File content: {}", content);
-#endif
             // Read file content into memory
             in.read(mem.get(), size);
             in.close();
@@ -77,6 +71,17 @@ namespace heliosxsimulator {
                 "0x{:x}, wb_sel: 0x{:x}, ack_o: {}, data_o: 0x{:x}",
                 wb_cycle, wb_we, wb_addr, wb_data, wb_sel, ack_o, data_o);
 #endif
+        }
+    }
+
+    void Memory::fetch(uint32_t cycle, uint32_t pc, Instruction& inst_o,
+                       uint32_t& inst_valid_o) {
+        inst_valid_o = cycle && next_ack;
+        inst_o = next_inst;
+        next_ack = 0;
+        if (cycle) {
+            next_ack = 1;
+            next_inst = *(Instruction*)(mem.get() + pc - base_addr);
         }
     }
 
