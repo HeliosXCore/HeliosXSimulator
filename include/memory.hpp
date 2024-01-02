@@ -6,8 +6,7 @@
 namespace heliosxsimulator {
     union Instruction {
         uint32_t instructions[4];
-
-        uint8_t padding[128];
+        uint8_t padding[16];
     };
 
     class Memory {

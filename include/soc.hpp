@@ -1,5 +1,6 @@
 #pragma once
 #include "emulator.hpp"
+#include "memory.hpp"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
 #include <memory>
@@ -14,6 +15,8 @@ namespace heliosxsimulator {
        public:
         std::shared_ptr<Dut> cpu_top;
         std::shared_ptr<EmulatorWrapper> emulator;
+        std::unique_ptr<Memory> imem;
+        std::unique_ptr<Memory> dmem;
 
         virtual void connect_wire();
         virtual void initialize_dut();
