@@ -1,6 +1,4 @@
 [submodule "3rd-party/fmt"]
 	path = 3rd-party/fmt
 	url = git@github.com:fmtlib/fmt.git
-[submodule "3rd-party/HeliosXEmulator"]
-	path = 3rd-party/HeliosXEmulator
-	url = git@github.com:HeliosXCore/HeliosXEmulator.git
+
