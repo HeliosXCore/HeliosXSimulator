@@ -1,5 +1,5 @@
 CC	:= g++
-
+NAME 		:= HeliosXSimulator
 EXAMPLE 	:= emulator
 SRCS		:= $(wildcard src/*.cpp)
 OBJS 		:= $(patsubst src/%.cpp,build/%.o,$(SRCS))
@@ -12,6 +12,8 @@ LDFLAGS		:= -L3rd-party/HeliosXEmulator/build -lHeliosXEmulator \
 DFLAGS		:= -DFMT_HEADER_ONLY
 
 DEBUG		?= N
+
+BINARY ?= build/$(NAME)
 
 ifeq ($(DEBUG),Y)
 	DFLAGS += -DDEBUG
@@ -26,6 +28,13 @@ build/%.o: src/%.cpp
 	@$(CC) $(IFLAGS) $(DFLAGS) -std=c++17 -c $< -o $@
 
 build: $(OBJS)
+
+$(BINARY).a: $(OBJS)
+	@echo + AR $@
+	@ar rcs $@ $^
+	@mv $(BINARY).a build/lib$(NAME).a
+
+static : $(BINARY).a
 
 example: build
 	@$(CC) examples/$(EXAMPLE).cpp $(OBJS) $(IFLAGS) $(DFLAGS) $(LDFLAGS) -o build/$(EXAMPLE) -std=c++17

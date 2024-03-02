@@ -5,7 +5,7 @@
 namespace heliosxsimulator {
     Memory::Memory(uint32_t base_addr, uint32_t size)
         : base_addr(base_addr), size(size) {
-        mem = std::make_unique<char>(size);
+        mem = std::make_unique<char[]>(size);
         next_ack = 0;
         next_data = 0;
     }

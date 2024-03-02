@@ -21,7 +21,7 @@ namespace heliosxsimulator {
                    uint32_t &inst_valid_o);
         uint32_t &operator[](const uint32_t addr);
 
-        std::unique_ptr<char> mem;
+        std::unique_ptr<char[]> mem;
         uint32_t base_addr;
         uint32_t size;
         int next_ack;

@@ -18,6 +18,26 @@ namespace heliosxsimulator {
         std::unique_ptr<Memory> imem;
         std::unique_ptr<Memory> dmem;
 
+        SocSimulator(std::shared_ptr<Dut> cpu_top,
+                     std::shared_ptr<EmulatorWrapper> emulator,
+                     std::unique_ptr<Memory> imem, std::unique_ptr<Memory> dmem,
+                     uint64_t cpu_clk)
+            : cpu_top(cpu_top),
+              emulator(emulator),
+              imem(std::move(imem)),
+              dmem(std::move(dmem)),
+              cpu_clk(cpu_clk) {
+            cpu_clk = 0;
+            cpu_reset = 1;
+            cpu_inst_i[0] = 0;
+            cpu_inst_i[1] = 0;
+            cpu_inst_i[2] = 0;
+            cpu_inst_i[3] = 0;
+            read_dmem_data_i = 0;
+            running = false;
+            last_commit = 0;
+        }
+
         virtual void connect_wire();
         virtual void initialize_dut();
         virtual bool trace_on();
