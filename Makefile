@@ -4,7 +4,8 @@ EXAMPLE 	:= emulator
 SRCS		:= $(wildcard src/*.cpp)
 OBJS 		:= $(patsubst src/%.cpp,build/%.o,$(SRCS))
 IFLAGS		:= -Iinclude -I3rd-party/fmt/include \
-			   -I/opt/homebrew/Cellar/verilator/5.016/share/verilator/include
+			   -I/opt/homebrew/Cellar/verilator/5.016/share/verilator/include \
+			   -I/home/vscode/verilator-5.020/include
 LDFLAGS		:= -L3rd-party/HeliosXEmulator/build -lHeliosXEmulator \
 			   -L3rd-party/fmt/build -lfmt \
 			   -lstdc++
