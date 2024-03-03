@@ -72,7 +72,6 @@ namespace heliosxsimulator {
             cpu_top->idata_i = cpu_inst_i;
             cpu_top->dmem_rdata_i = read_dmem_data_i;
 
-            // pc_o = cpu_top->pc_o;
             dmem_we_o = cpu_top->dmem_we_o;
             write_dmem_data_o = cpu_top->dmem_wdata_o;
             dmem_addr_o = cpu_top->dmem_waddr_o;
@@ -170,6 +169,8 @@ namespace heliosxsimulator {
             }
 
             m_trace->close();
+
+            fmt::println("Simulation finished at time {}", sim_time);
         }
 
        protected:
