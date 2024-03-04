@@ -34,6 +34,7 @@ namespace heliosxsimulator {
             read_dmem_data_i = 0;
             running = false;
             last_commit = 0;
+            last_pc = 0x0;
         }
 
         void detect_commit_timeout() {
@@ -96,7 +97,7 @@ namespace heliosxsimulator {
             uint32_t ref_wreg_num;
             uint32_t ref_wreg_data;
 
-            if (trace_on() && debug_wen && debug_wreg_num) {
+            if (trace_on() && (debug_wen || debug_pc_o != last_pc)) {
                 DifftestResult result;
                 emulator->exec(1, &result);
                 ref_pc = result.pc;
@@ -128,6 +129,7 @@ namespace heliosxsimulator {
                         sim_time, debug_pc_o, debug_wen, debug_wreg_num,
                         debug_wreg_data);
 #endif
+                    last_pc = debug_pc_o;
                 }
             }
         }
@@ -190,6 +192,8 @@ namespace heliosxsimulator {
         uint64_t debug_wreg_num;
         uint32_t debug_wreg_data;
         uint32_t debug_pc_o;
+
+        uint32_t last_pc;
 
         uint64_t start_time;
         uint64_t sim_time;
