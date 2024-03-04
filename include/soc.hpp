@@ -122,12 +122,14 @@ namespace heliosxsimulator {
                 } else {
 #ifdef DEBUG
                     fmt::println(
-                        "Trace passed at time {}, pc: {:#x}, wen: {}, "
+                        "Trace passed at time {}, pc: {:#x}, last_pc: {:#x}, "
+                        "wen: {}, "
                         "wreg_num: "
                         "{}, "
                         "wreg_data: {:#x}",
-                        sim_time, debug_pc_o, debug_wen, debug_wreg_num,
-                        debug_wreg_data);
+
+                        sim_time, debug_pc_o, last_pc, debug_wen,
+                        debug_wreg_num, debug_wreg_data);
 #endif
                     last_pc = debug_pc_o;
                 }
