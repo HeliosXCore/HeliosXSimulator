@@ -3,6 +3,7 @@
 #include "memory.hpp"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <cstdint>
 #include <memory>
 #include <fstream>
 #include <fmt/core.h>
@@ -37,8 +38,25 @@ namespace heliosxsimulator {
             last_pc = 0x0;
         }
 
+        const char *regs[32] = {
+            "$0", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
+            "a1", "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
+            "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
+
+        const char *reg_idx2str(const uint32_t idx) { return regs[idx]; }
+
+        uint32_t get_regidx(const char *regname) {
+            for (int i = 0; i < 32; i++) {
+                if (strcmp(regname, regs[i]) == 0) {
+                    return i;
+                }
+            }
+            fmt::println("regname is not correct!\n");
+            return -1;
+        }
+
         void detect_commit_timeout() {
-            if (debug_wen) {
+            if (debug_commit_en) {
                 last_commit = sim_time;
             } else if (sim_time - last_commit > COMMIT_TIMEOUT) {
                 fmt::println("Commit timeout at time {}", sim_time);
@@ -78,6 +96,7 @@ namespace heliosxsimulator {
             dmem_addr_o = cpu_top->dmem_waddr_o;
 
             debug_pc_o = cpu_top->debug_pc_o;
+            debug_commit_en = cpu_top->debug_commit_en_o;
             debug_wen = cpu_top->debug_reg_wen_o;
             debug_wreg_data = cpu_top->debug_reg_wdata_o;
             debug_wreg_num = cpu_top->debug_reg_id_o;
@@ -97,7 +116,8 @@ namespace heliosxsimulator {
             uint32_t ref_wreg_num;
             uint32_t ref_wreg_data;
 
-            if (trace_on() && (debug_wen || debug_pc_o != last_pc)) {
+            /* if (trace_on() && (debug_wen || debug_pc_o != last_pc)) { */
+            if (trace_on() && (debug_commit_en)) {
                 DifftestResult result;
                 emulator->exec(1, &result);
                 ref_pc = result.pc;
@@ -108,16 +128,22 @@ namespace heliosxsimulator {
                     ref_wreg_num != debug_wreg_num ||
                     ref_wreg_data != debug_wreg_data) {
                     fmt::println("Trace failed at time {}", sim_time);
+                    fmt::println("当前是第{}条指令(从1开始)",
+                                 (ref_pc - 0x80000000) / 4 + 1);
                     fmt::println(
-                        "Expected: pc: {:#x}, wen: {:#x}, wreg_num: {:#x}, "
+                        "\tExpected: pc: {:#x}, wen: {:#x}, wreg_num: {:#x}, "
+                        "wreg_name: {}, "
                         "wreg_data: "
                         "{:#x}",
-                        ref_pc, ref_wen, ref_wreg_num, ref_wreg_data);
+                        ref_pc, ref_wen, ref_wreg_num,
+                        reg_idx2str(ref_wreg_num), ref_wreg_data);
                     fmt::println(
-                        "Actual: pc: {:#x}, wen: {:#x}, wreg_num: {:#x}, "
+                        "\tActual: pc: {:#x}, wen: {:#x}, wreg_num: "
+                        "{:#x}, wreg_name: {}, "
                         "wreg_data: "
                         "{:#x}",
-                        debug_pc_o, debug_wen, debug_wreg_num, debug_wreg_data);
+                        debug_pc_o, debug_wen, debug_wreg_num,
+                        reg_idx2str(debug_wreg_num), debug_wreg_data);
                     running = false;
                 } else {
 #ifdef DEBUG
@@ -190,6 +216,7 @@ namespace heliosxsimulator {
         uint32_t dmem_addr_o;
 
         // trace info
+        uint64_t debug_commit_en;
         uint64_t debug_wen;
         uint64_t debug_wreg_num;
         uint32_t debug_wreg_data;
