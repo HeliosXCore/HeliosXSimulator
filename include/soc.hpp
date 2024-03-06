@@ -3,10 +3,12 @@
 #include "memory.hpp"
 #include <verilated.h>
 #include <verilated_vcd_c.h>
+#include <cassert>
 #include <cstdint>
 #include <memory>
 #include <fstream>
 #include <fmt/core.h>
+#include "VHeliosX___024root.h"
 
 #define COMMIT_TIMEOUT 5000
 
@@ -38,6 +40,13 @@ namespace heliosxsimulator {
             last_pc = 0x0;
         }
 
+        uint64_t get_rrf_rrfvalid(uint64_t rrftag) {
+            vluint64_t rrfvalid =
+                cpu_top->rootp
+                    ->HeliosX__DOT__u_ReNameUnit__DOT__rrf__DOT__rrf_valid;
+            vluint64_t mask = 0x1l << rrftag;
+            return (rrfvalid & mask) >> rrftag;
+        }
         const char *regs[32] = {
             "$0", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
             "a1", "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
@@ -128,8 +137,9 @@ namespace heliosxsimulator {
                     ref_wreg_num != debug_wreg_num ||
                     ref_wreg_data != debug_wreg_data) {
                     fmt::println("Trace failed at time {}", sim_time);
-                    fmt::println("当前是第{}条指令(从1开始)",
-                                 (ref_pc - 0x80000000) / 4 + 1);
+                    int inst_cnt = (ref_pc - 0x80000000) / 4 + 1;
+                    fmt::println("当前是第{}条指令(从1开始,取指sim_time为{})",
+                                 inst_cnt, (inst_cnt - 1) * 10 + 100);
                     fmt::println(
                         "\tExpected: pc: {:#x}, wen: {:#x}, wreg_num: {:#x}, "
                         "wreg_name: {}, "
@@ -156,6 +166,21 @@ namespace heliosxsimulator {
 
                         sim_time, debug_pc_o, last_pc, debug_wen,
                         debug_wreg_num, debug_wreg_data);
+
+                    /* fmt::print("====================\n"); */
+                    /* fmt::print( */
+                    /*     "{:#x}, {:#x}", */
+                    /*     cpu_top->rootp */
+                    /*         ->HeliosX__DOT__u_ReNameUnit__DOT__rrf__DOT__rrf_valid,
+                     */
+                    /*     get_rrf_rrfvalid(1)); */
+                    /* fmt::print("\n===================="); */
+
+                    /* if (get_rrf_rrfvalid(1) == 1) { */
+                    /*     fmt::print("current sim_time:{}", sim_time); */
+                    /*     running = false; */
+                    /* } */
+
 #endif
                     last_pc = debug_pc_o;
                 }
