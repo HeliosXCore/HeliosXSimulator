@@ -202,6 +202,7 @@ namespace heliosxsimulator {
                 ref_wreg_num = result.reg_id;
                 ref_wreg_data = result.reg_val;
                 int inst_cnt = (ref_pc - 0x80000000) / 4 + 1;
+                total_cnt = inst_cnt;
                 if (ref_pc != debug_pc_o || ref_wen != debug_wen ||
                     ref_wreg_num != debug_wreg_num ||
                     ref_wreg_data != debug_wreg_data) {
@@ -308,6 +309,9 @@ namespace heliosxsimulator {
 
             m_trace->close();
 
+            fmt::println("============================");
+            fmt::println("{} instructions were tested in total", total_cnt);
+            fmt::println("============================");
             fmt::println("Simulation finished at time {}", sim_time);
         }
 
@@ -336,6 +340,8 @@ namespace heliosxsimulator {
         uint64_t sim_time;
         uint64_t last_commit;
         bool running;
+
+        int total_cnt;
 
         std::ifstream trace_file;
 
