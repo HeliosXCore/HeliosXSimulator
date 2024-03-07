@@ -44,6 +44,11 @@ namespace heliosxsimulator {
             last_pc = 0x0;
         }
 
+        uint64_t get_rrf_rrfdata(uint64_t rrftag) {
+            return cpu_top->rootp
+                ->HeliosX__DOT__u_ReNameUnit__DOT__rrf__DOT__rrf_data[rrftag];
+        }
+
         std::string to_hex_string_with_prefix(uint64_t value, int width) {
             std::stringstream stream;
             stream << "0x" << std::setfill(' ') << std::setw(width) << std::hex
@@ -196,11 +201,11 @@ namespace heliosxsimulator {
                 ref_wen = result.wen;
                 ref_wreg_num = result.reg_id;
                 ref_wreg_data = result.reg_val;
+                int inst_cnt = (ref_pc - 0x80000000) / 4 + 1;
                 if (ref_pc != debug_pc_o || ref_wen != debug_wen ||
                     ref_wreg_num != debug_wreg_num ||
                     ref_wreg_data != debug_wreg_data) {
                     fmt::println("Trace failed at time {}", sim_time);
-                    int inst_cnt = (ref_pc - 0x80000000) / 4 + 1;
                     fmt::println("当前是第{}条指令(从1开始,取指sim_time为{})",
                                  inst_cnt, (inst_cnt - 1) * 10 + 100);
                     fmt::println(
@@ -221,6 +226,8 @@ namespace heliosxsimulator {
                     running = false;
                 } else {
 #ifdef DEBUG
+                    fmt::println("当前是第{}条指令(从1开始,取指sim_time为{})",
+                                 inst_cnt, (inst_cnt - 1) * 10 + 100);
                     fmt::println(
                         "Trace passed at time {}, pc: {:#x}, last_pc: {:#x}, "
                         "wen: {}, "
@@ -255,6 +262,10 @@ namespace heliosxsimulator {
             /*     fmt::println("================当前sim_time:{}", sim_time); */
             /*     print_rob(); */
             /*     fmt::println("================"); */
+            /* } */
+            /* if (sim_time == 1450) { */
+            /*     assert(get_rrf_rrfdata(63) == 0x7fff8000); */
+            /*     fmt::println("=====assert pass====="); */
             /* } */
 #endif  // DEBUG
         }
