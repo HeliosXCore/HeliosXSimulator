@@ -1,7 +1,4 @@
 #pragma once
-#include <sstream>  // for std::stringstream
-#include <iostream>
-#include <iomanip>  // for std::setw and std::setfill
 #include "emulator.hpp"
 #include "memory.hpp"
 #include <verilated.h>
@@ -11,8 +8,6 @@
 #include <memory>
 #include <fstream>
 #include <fmt/core.h>
-#include "VHeliosX___024root.h"
-#include "verilatedos.h"
 
 #define COMMIT_TIMEOUT 5000
 
@@ -44,93 +39,12 @@ namespace heliosxsimulator {
             last_pc = 0x0;
         }
 
-        uint64_t get_rrf_rrfdata(uint64_t rrftag) {
-            return cpu_top->rootp
-                ->HeliosX__DOT__u_ReNameUnit__DOT__rrf__DOT__rrf_data[rrftag];
-        }
-
-        std::string to_hex_string_with_prefix(uint64_t value, int width) {
-            std::stringstream stream;
-            stream << "0x" << std::setfill(' ') << std::setw(width) << std::hex
-                   << value;
-            return stream.str();
-        }
-
-        vluint64_t rob_valid =
-            cpu_top->rootp->HeliosX__DOT__u_SingleInstROB__DOT__valid;
-
-        vluint64_t rob_finish =
-            cpu_top->rootp->HeliosX__DOT__u_SingleInstROB__DOT__finish;
-
-        vluint64_t rob_dstvalid =
-            cpu_top->rootp->HeliosX__DOT__u_SingleInstROB__DOT__dstValid;
-
-        struct VlUnpacked<uint32_t, 64> inst_pc =
-            cpu_top->rootp->HeliosX__DOT__u_SingleInstROB__DOT__inst_pc;
-
-        struct VlUnpacked<uint8_t, 64> dstnum =
-            cpu_top->rootp->HeliosX__DOT__u_SingleInstROB__DOT__dst;
-
-        void print_rob() {
-            // 设置列宽
-            const int width_hex = 18;  // 16进制的列宽，增加以适应0x前缀
-            const int width_dec = 5;  // 10进制的列宽
-            const int width_tag = 8;  // rrftag列宽
-
-            // 打印表头
-            std::cout << std::left << std::setfill(' ') << std::setw(width_tag)
-                      << "rrftag" << std::setw(width_hex) << "finish"
-                      << std::setw(width_hex) << "valid" << std::setw(width_hex)
-                      << "dstValid" << std::setw(width_hex) << "inst_pc"
-                      << std::setw(width_dec) << "dst" << std::endl;
-
-            // 打印各行数据
-            for (int i = 0; i < 64; ++i) {
-                std::cout << std::left << std::setfill(' ') << std::dec
-                          << std::setw(width_tag) << i << std::setw(width_hex)
-                          << to_hex_string_with_prefix((rob_finish >> i) & 1, 1)
-                          << std::setw(width_hex)
-                          << to_hex_string_with_prefix((rob_valid >> i) & 1, 1)
-                          << std::setw(width_hex)
-                          << to_hex_string_with_prefix((rob_dstvalid >> i) & 1,
-                                                       1)
-                          << std::setw(width_hex)
-                          << to_hex_string_with_prefix(inst_pc[i], 8)
-                          << std::dec << std::setw(width_dec)
-                          << static_cast<unsigned>(dstnum[i]) << std::endl;
-            }
-            // 打印表头
-            std::cout << std::left << std::setfill(' ') << std::setw(width_tag)
-                      << "rrftag" << std::setw(width_hex) << "finish"
-                      << std::setw(width_hex) << "valid" << std::setw(width_hex)
-                      << "dstValid" << std::setw(width_hex) << "inst_pc"
-                      << std::setw(width_dec) << "dst" << std::endl;
-        }
-
-        uint64_t get_rrf_rrfvalid(uint64_t rrftag) {
-            vluint64_t rrfvalid =
-                cpu_top->rootp
-                    ->HeliosX__DOT__u_ReNameUnit__DOT__rrf__DOT__rrf_valid;
-            vluint64_t mask = 0x1l << rrftag;
-            return (rrfvalid & mask) >> rrftag;
-        }
-
         const char *regs[32] = {
             "$0", "ra", "sp", "gp", "tp",  "t0",  "t1", "t2", "s0", "s1", "a0",
             "a1", "a2", "a3", "a4", "a5",  "a6",  "a7", "s2", "s3", "s4", "s5",
             "s6", "s7", "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"};
 
         const char *reg_idx2str(const uint32_t idx) { return regs[idx]; }
-
-        uint32_t get_regidx(const char *regname) {
-            for (int i = 0; i < 32; i++) {
-                if (strcmp(regname, regs[i]) == 0) {
-                    return i;
-                }
-            }
-            fmt::println("regname is not correct!\n");
-            return -1;
-        }
 
         void detect_commit_timeout() {
             if (debug_commit_en) {
@@ -187,13 +101,14 @@ namespace heliosxsimulator {
 
         virtual bool trace_on() { return true; }
 
+        virtual void debug_error_info() {}
+
         virtual void trace() {
             uint32_t ref_pc;
             uint32_t ref_wen;
             uint32_t ref_wreg_num;
             uint32_t ref_wreg_data;
 
-            /* if (trace_on() && (debug_wen || debug_pc_o != last_pc)) { */
             if (trace_on() && (debug_commit_en)) {
                 DifftestResult result;
                 emulator->exec(1, &result);
@@ -207,7 +122,7 @@ namespace heliosxsimulator {
                     ref_wreg_num != debug_wreg_num ||
                     ref_wreg_data != debug_wreg_data) {
                     fmt::println("Trace failed at time {}", sim_time);
-                    fmt::println("当前是第{}条指令(从1开始,取指sim_time为{})",
+                    fmt::println("The current instruction is {}, sim_time: {}",
                                  inst_cnt, (inst_cnt - 1) * 10 + 100);
                     fmt::println(
                         "\tExpected: pc: {:#x}, wen: {:#x}, wreg_num: {:#x}, "
@@ -224,6 +139,8 @@ namespace heliosxsimulator {
                         debug_pc_o, debug_wen, debug_wreg_num,
                         reg_idx2str(debug_wreg_num), debug_wreg_data);
 
+                    debug_error_info();
+
                     running = false;
                 } else {
 #ifdef DEBUG
@@ -239,36 +156,10 @@ namespace heliosxsimulator {
                         sim_time, debug_pc_o, last_pc, debug_wen,
                         debug_wreg_num, debug_wreg_data);
 
-                    /* fmt::print("====================\n"); */
-                    /* fmt::print( */
-                    /*     "{:#x}, {:#x}", */
-                    /*     cpu_top->rootp */
-                    /*         ->HeliosX__DOT__u_ReNameUnit__DOT__rrf__DOT__rrf_valid,
-                     */
-                    /*     get_rrf_rrfvalid(1)); */
-                    /* fmt::print("\n===================="); */
-
-                    /* if (get_rrf_rrfvalid(1) == 1) { */
-                    /*     fmt::print("current sim_time:{}", sim_time); */
-                    /*     running = false; */
-                    /* } */
-
 #endif
                     last_pc = debug_pc_o;
                 }
             }
-
-#ifdef DEBUG
-            /* if (sim_time == 1490) { */
-            /*     fmt::println("================当前sim_time:{}", sim_time); */
-            /*     print_rob(); */
-            /*     fmt::println("================"); */
-            /* } */
-            /* if (sim_time == 1450) { */
-            /*     assert(get_rrf_rrfdata(63) == 0x7fff8000); */
-            /*     fmt::println("=====assert pass====="); */
-            /* } */
-#endif  // DEBUG
         }
 
         virtual void setup() {
